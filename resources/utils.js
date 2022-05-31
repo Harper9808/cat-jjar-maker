@@ -7,14 +7,6 @@ const CAT3 = "https://cataas.com/cat/595f280b557291a9750ebf65/says/JavaScript";
 
 const includesHangul = (text) => /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/i.test(text);
 
-const jsonLocalStorage = {
-  setItem: (key, value) => {
-    localStorage.setItem(key, JSON.stringify(value));
-  },
-  getItem: (key) => {
-    return JSON.parse(localStorage.getItem(key));
-  },
-};
 
 const fetchCat = async (text) => {
   const OPEN_API_DOMAIN = "https://cataas.com";

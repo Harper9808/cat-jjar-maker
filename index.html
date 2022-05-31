@@ -1,67 +1,163 @@
 <!DOCTYPE html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>고양이 가라사대</title>
-  </head>
-  <style>
-    body {
-      text-align: center;
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>고양이 가라사대</title>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+</head>
+<style>
+  body {
+    text-align: center;
+  }
+
+  .main-card button {
+    position: relative;
+    left: -45px;
+    bottom: 15px;
+  }
+
+  .favorites {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+</style>
+
+<body>
+  <div id="App"></div>
+  <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+  <script type="text/babel">
+
+    const jsonLocalStorage = {
+      setItem: (key, value) => {
+        localStorage.setItem(key, JSON.stringify(value));
+      },
+      getItem: (key) => {
+        return JSON.parse(localStorage.getItem(key));
+      },
+    };
+
+    const CAT1 = "./src/img/1.PNG"
+    const CAT2 = "./src/img/2.PNG"
+    const CAT3 = "./src/img/3.PNG"
+    const CAT4 = "./src/img/4.PNG"
+
+    const cats = [CAT1, CAT2, CAT3, CAT4]
+
+    function CatItem({ img }) {
+      return (
+        <li>
+          <img
+            src={img}
+            alt="고양이" style={{ width: '150px' }}
+          />
+        </li>
+      )
     }
-    .main-card button {
-      position: relative;
-      left: -45px;
-      bottom: 15px;
+    function Favorites({ favorits }) {
+      return (
+        <ul className="favorites">
+          {favorits.map(cat => <CatItem img={cat} key={cat} />)}
+        </ul>
+      )
     }
-    .favorites {
-      list-style: none;
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 15px;
+    //Arrow Funcion 사용해서 만든 컴포넌트
+    const MainCard = ({ img, onHartClick }) => {
+      return (
+        <div className="main-card">
+          <img src={img} alt="고양이" width="400" />
+          <button onClick={onHartClick} >🤍</button>
+        </div>
+      )
     }
-    .favorites img {
-      width: 150px;
+    function Card(title, description) {
+      return (
+        <div className="card">
+          <h2>{title}</h2>
+          {description}
+        </div>
+      )
     }
-  </style>
-  <body>
-    <h1>1번째 고양이 가라사대</h1>
-    <form>
-      <input type="text" name="name" placeholder="영어 대사를 입력해주세요" />
-      <button type="submit">생성</button>
-    </form>
-    <div class="main-card">
-      <img
-        src="https://cataas.com/cat/60b73094e04e18001194a309/says/react"
-        alt="고양이"
-        width="400"
-      />
-      <button>🤍</button>
-    </div>
-    <ul class="favorites">
-      <li>
-        <img
-          src="https://cataas.com/cat/60b73094e04e18001194a309/says/react"
-          alt="고양이"
-        />
-      </li>
-      <li>
-        <img
-          src="https://cataas.com/cat/60b73094e04e18001194a309/says/react"
-          alt="고양이"
-        />
-      </li>
-      <li>
-        <img
-          src="https://cataas.com/cat/60b73094e04e18001194a309/says/react"
-          alt="고양이"
-        />
-      </li>
-    </ul>
-    <script>
-      console.log("야옹");
-    </script>
-  </body>
+    const Form = ({ onUpdateMainCat }) => {
+      const [value, setValue] = React.useState('')
+      const includesHangul = (text) => /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/i.test(text);
+      const [errMessage, seterrMessage] = React.useState('')
+      function HandleInputChange(e) {
+        const inputText = e.target.value
+        seterrMessage('')
+        if (includesHangul(inputText)) {
+          seterrMessage("한글은 쓸 수 없습니다.")
+        }
+        //대문자로 변환시켜주기 
+        setValue(e.target.value.toUpperCase())
+      }
+      function handleFormSubmit(e) {
+        event.preventDefault()
+        seterrMessage('')
+        if (value === '') {
+          seterrMessage("빈 값으로 만들 수 없습니다.")
+          return
+        }
+        onUpdateMainCat()
+
+      }
+
+      return (
+        <form onSubmit={handleFormSubmit}>
+          <input type="text" value={value} onChange={HandleInputChange} name="name" placeholder="영어 대사를 입력해주세요" />
+          <button type="submit">생성</button>
+          <p style={{ color: 'red' }}>{errMessage}</p>
+        </form>
+      )
+    }
+
+
+    function Title(props) {
+      return (
+        <h1>{props.children}</h1>
+      )
+
+    }
+    function App() {
+      //상태 끌어올리기 
+      const [counter, setCounter] = React.useState(jsonLocalStorage.getItem("counter"));
+      console.log(counter)
+      //이미지를 관리하는 상태 추가 
+      const [mainCat, setMainCat] = React.useState(CAT1)
+      //상태를 사용하는 이벤트 핸들러도 끌어올리기 
+      const [favorits, setFavorits] = React.useState(jsonLocalStorage.getItem("favorits") || [])
+      function updateMainCat() {
+        setMainCat(CAT2)
+        setCounter(counter + 1)
+        const nextCount = counter + 1
+        jsonLocalStorage.setItem('counter', nextCount)
+      }
+
+      function handleHartClick(e) {
+        console.log("하트클릭")
+        const nextFavorits = [...favorits, mainCat]
+        setFavorits(nextFavorits)
+        jsonLocalStorage.setItem("favorits", nextFavorits)
+      }
+      return (
+        <div>
+          <Title>{counter}번째 고양이 가라사대</Title>
+          <Form onUpdateMainCat={updateMainCat} />
+          <MainCard img={mainCat} onHartClick={handleHartClick} />
+          <Favorites favorits={favorits} />
+        </div>
+
+      )
+    }
+    const Appcontainer = document.querySelector("#App")
+    ReactDOM.render(<App />, Appcontainer)
+  </script>
+</body>
+
 </html>
